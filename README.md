@@ -1,6 +1,6 @@
 # MMMNet
 
-This is the code for the paper "Cross-modal Ambiguity Learning for Multimodal Fake News Detection"
+This is the code for the paper "M³Net: Multimodal-Feature-masked Networks for Fake News Detection"
 
 # Dataset
 Weibo and Twitter
@@ -17,4 +17,12 @@ After setting the path of the data set, you can use dataprocessing for data prep
 # Train
 After the first phase of training is completed, the .pth file will be saved, and then the second phase of classifier training needs to be manually performed.
 
+# Test
+The test codes for all indicators are in the train.py file. You can select the evaluation indicators for output.
 
+## Requirements
+- Python 3.9
+- Pytorch 1.13.1
+- Math
+- BERT (hugging-face https://huggingface.curated.co/)
+- VGG 19 ("https://mega.nz/#!xZ8glS6J!MAnE91ND_WyfZ_8mvkuSa2YcA7q-1ehfSm-Q1fxOvvs" or 'vgg19': 'https://download.pytorch.org/models/vgg19-dcbb9e9d.pth')
