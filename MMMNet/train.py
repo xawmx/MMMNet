@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import numpy as np
 import sys
 from torch.utils.data import Dataset, DataLoader
-from model import Alignment, Classifier
+from model import Alignment, Classifier, Classifier_M
 from mask_generator import FeatureMask
 from tqdm import tqdm
 
@@ -75,7 +75,8 @@ def train():
     alignment_model = Alignment()
     # auxiliary_task_model = Auxiliary_Task()
     classifier_task_model = Classifier()
-    auto_mask = FeatureMask(80)
+    # classifier_task_model_M = Classifier_M()
+    # auto_mask = FeatureMask(dim)
 
     loss_function_auxiliary = nn.CosineEmbeddingLoss(reduction='mean')
     loss_function_classifier = nn.BCELoss(reduction='mean')
@@ -83,15 +84,13 @@ def train():
     optim_alignment = torch.optim.Adam(
         alignment_model.parameters(), lr=1e-4, weight_decay=0
     )
-    # optim_auxiliary_task = torch.optim.Adam(
-    #     auxiliary_task_model.parameters(), lr=1e-3, weight_decay=0
-    # )
+
     optim_classifier_task = torch.optim.Adam(
         classifier_task_model.parameters(), lr=1e-5, weight_decay=0
     )
-    optim_mask = torch.optim.Adam(
-        auto_mask.parameters(), lr=1e-4, weight_decay=0
-    )
+    # optim_mask = torch.optim.Adam(
+    #     auto_mask.parameters(), lr=1e-4, weight_decay=0
+    # )
 
     # ---  Models Training  ---
     # loss_auxiliary_total = 0
@@ -99,11 +98,8 @@ def train():
     # best_acc = 0
     for epoch_auxiliary in range(auxiliary_epoch_num):
         alignment_model.train()
-        # auxiliary_task_model.train()
         classifier_task_model.train()
-        auto_mask.train()
-        corrects_pre_similarity = 0
-        corrects_pre_classifier = 0
+        # auto_mask.train()
         loss_auxiliary_total = list()
         loss_classifier_total = 0
         similarity_count = 0
@@ -116,10 +112,8 @@ def train():
             # _, similar = classifier_task_model(text_aligned, pic_aligned)
             loss_auxiliary = loss_function_auxiliary(text_aligned, pic_aligned, label_reshaped)
             optim_alignment.zero_grad()
-            # optim_auxiliary_task.zero_grad()
             loss_auxiliary.backward()
             optim_alignment.step()
-            # optim_auxiliary_task.step()
             loss_auxiliary_total.append(loss_auxiliary.item())
 
         print(f"Epoch {epoch_auxiliary + 1}/{auxiliary_epoch_num}, Loss: {np.mean(np.array(loss_auxiliary_total)):.4f}")
@@ -151,12 +145,14 @@ def train():
         # mask_1 = auto_mask()
         loss_classifier_total = 0
         # ---  CLASSIFIER TASK  ---
+        # ---  If you want to run a masked version, please use the code annotated on the second line  ---
         for text, pic, label in classifier_task_train_dataloader:
             text_align, pic_align = alignment_model(text, pic)
             label_pre = classifier_task_model(text_align, pic_align, text, pic)
+            # label_pre = classifier_task_model_M(text_align, pic_align, text, pic, auto_mask)
             loss_classifier = loss_function_classifier(label_pre, label)
             optim_classifier_task.zero_grad()
-            optim_mask.zero_grad()
+            # optim_mask.zero_grad()
             loss_classifier.backward()
             optim_classifier_task.step()
 
@@ -173,6 +169,7 @@ def train():
             for t, p, l in test_dataloader:
                 t_a, p_a = alignment_model(t, p)
                 l_pre = classifier_task_model(t_a, p_a, t, p)
+                # l_pre = classifier_task_model(t_a, p_a, t, p, auto_mask)
                 predicted = l_pre > 0.5
                 total += l.size(0)
                 correct += (predicted == l).sum().item()
@@ -181,11 +178,12 @@ def train():
 
         print(f"Epoch {epoch_classifier + 1}/{classifier_epoch_num}, Loss: {loss_classifier_total:.4f}")
 
-
     alignment_model.eval()
     classifier_task_model.eval()
+    # classifier_task_model_M.eval()
     # torch.save(classifier_task_model, 'class.pth')
-    auto_mask.eval()
+    # torch.save(classifier_task_model_M, 'class_M.pth')
+    # auto_mask.eval()
     # # ---  Test  ---
     with torch.no_grad():
         correct = 0
@@ -194,7 +192,8 @@ def train():
         total = 0
         for t, p, l in classifier_task_train_dataloader:
             t_a, p_a = alignment_model(t, p)
-            l_pre = classifier_task_model(t_a, p_a, t, p, auto_mask)
+            l_pre = classifier_task_model(t_a, p_a, t, p)
+            # l_pre = classifier_task_model_M(t_a, p_a, t, p, auto_mask)
             predicted = l_pre > 0.5
             total += l.size(0)
             correct += (predicted == l).sum().item()
@@ -203,7 +202,7 @@ def train():
         acc = 100 * correct / total
         # pre = 100 * correct_p / n1
         # rec = 100 * correct_p / correct_1
-        # f1_score = (pre * rec * 2) / (pre + rec)
+        # f1_score = 100 * (pre * rec * 2) / (pre + rec)
         print(f"Test Accuracy: {acc:.2f}%")
 
 
