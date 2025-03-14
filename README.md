@@ -1,9 +1,8 @@
-# MMMNet
+# Multimodal fake news detection and risk warning
 
-This is the code for the paper "M³Net: Multimodal-Feature-masked Networks for Fake News Detection"
 
 # Dataset
-Weibo and Twitter
+Multimodal fake news detection: Weibo and Twitter
 
 You can download Weibo dataset from https://pan.baidu.com/s/1Vn75mXe69jC9txqB81QzUQ ( extraction code: 78uo )
 or https://drive.google.com/file/d/14VQ7EWPiFeGzxp3XC2DeEHi-BEisDINn/view?usp=sharing.
@@ -11,14 +10,23 @@ or https://drive.google.com/file/d/14VQ7EWPiFeGzxp3XC2DeEHi-BEisDINn/view?usp=sh
 You can download Twitter dataset from https://github.com/MKLab-ITI/image-verification-corpus/tree/master/mediaeval2016
 or https://github.com/plw-study/MRML
 
+Multimodal news risk warning: SM-D, GenIamge, NELA
+
+SM-D: https://www.selectdataset.com/dataset/beaf1420934ba365a1e37ed6f0412f6f
+
+GenIamge: https://github.com/GenImage-Dataset/GenImage
+
+NELA: https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/AMCV2H
+
 # Preprocessing
-After setting the path of the data set, you can use dataprocessing for data preprocessing.
+After setting the path of the dataset, you can use dataprocessing for data preprocessing.
 
 # Train
 After the first phase of training is completed, the .pth file will be saved, and then the second phase of classifier training needs to be manually performed.
 
 # Test
 The test codes for all indicators are in the train.py file. You can select the evaluation indicators for output.
+
 
 ## Requirements
 - Python 3.9
